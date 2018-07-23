@@ -1,9 +1,16 @@
-From DeepWeb.Proofs.Vst
-     Require Import VstInit VstLib VerifHelpers
-     SocketSpecs SocketTactics ServerSpecs
-     Connection monitor_connections_spec AppLogic AppLib.
 
-Require Import DeepWeb.Spec.ITreeSpec.
+Require Import DeepWeb.Spec.Swap_CLikeSpec.
+
+From DeepWeb.Spec.Vst
+     Require Import MainInit Gprog
+     SocketSpecs AppLogic Representation monitor_connections_spec.
+
+From DeepWeb.Lib
+     Require Import VstLib.
+
+From DeepWeb.Proofs.Vst
+     Require Import VerifLib SocketTactics
+     Connection AppLib.
 
 Import FDSetPred.
 
@@ -133,7 +140,7 @@ Proof.
       simpl fst; simpl snd.
       Intros.
 
-      Exists read_set1; Exists new_max.
+      Exists read_set1 new_max.
       entailer!.
 
       unfold YES, NO in *.
@@ -159,13 +166,13 @@ Proof.
 
     { (* else skip *)
       forward.
-      Exists curr_read_set; Exists max_fd0; entailer!.
+      Exists curr_read_set max_fd0; entailer!.
     }
 
     Intros read_set' max_fd1.
 
     thaw FR2; simpl.
-    freeze [0; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12] FR2; simpl.
+    freeze [0; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11] FR2; simpl.
 
     (* Repeat *)
     match goal with
@@ -190,7 +197,7 @@ Proof.
       simpl fst; simpl snd.
       Intros.
 
-      Exists write_set1; Exists new_max.
+      Exists write_set1 new_max.
       entailer!.
 
       unfold YES, NO in *.
@@ -216,7 +223,7 @@ Proof.
 
     { (* else skip *)
       forward.
-      Exists curr_write_set; Exists max_fd1; entailer!.
+      Exists curr_write_set max_fd1; entailer!.
     }
 
     Intro write_set'.
@@ -288,7 +295,7 @@ Proof.
       ];
       try solve [destruct conn; simpl;
                  unfold has_conn_state in Hstate;
-                 destruct Custom.Decidability.dec; auto; discriminate].
+                 destruct QuickChick.Decidability.dec; auto; discriminate].
      
 
     Local Ltac use_hyp :=
@@ -342,9 +349,7 @@ Proof.
 
   forward.
 
-  Exists curr_read_set.
-  Exists curr_write_set.
-  Exists max_fd0.
+  Exists curr_read_set curr_write_set max_fd0.
   repeat rewrite app_nil_r.
   entailer!.
 

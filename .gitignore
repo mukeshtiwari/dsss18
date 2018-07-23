@@ -29,3 +29,11 @@ lia.cache
 nia.cache
 nlia.cache
 nra.cache
+CONFIGURE
+.coqdeps.d
+vc/Makefile.conf
+vc/_CoqProject
+vfa/Makefile.conf
+dw/Makefile.coq
+dw/Makefile.coq.conf
+

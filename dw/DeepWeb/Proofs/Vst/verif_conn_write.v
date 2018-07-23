@@ -1,11 +1,16 @@
 Require Import String.
 
-From DeepWeb.Proofs.Vst
-     Require Import VstInit VstLib VerifHelpers
-     SocketSpecs SocketTactics ServerSpecs MonadExports
-     Connection conn_write_spec AppLogic.
+Require Import DeepWeb.Spec.Swap_CLikeSpec.
 
-Require Import DeepWeb.Spec.ITreeSpec.
+From DeepWeb.Spec.Vst
+     Require Import MainInit Gprog SocketSpecs MonadExports
+     AppLogic Representation conn_write_spec.
+
+From DeepWeb.Lib
+     Require Import VstLib.
+
+From DeepWeb.Proofs.Vst
+     Require Import VerifLib SocketTactics Connection.
 
 Import SockAPIPred.
 Import TracePred.
@@ -19,7 +24,7 @@ Set Bullet Behavior "Strict Subproofs".
 
 
 Lemma body_conn_write:
-  semax_body Vprog Gprog f_conn_write (conn_write_spec unit).
+  semax_body Vprog Gprog f_conn_write (conn_write_spec unit BUFFER_SIZE).
 Proof.
   start_function.
 
@@ -32,11 +37,12 @@ Proof.
     by entailer!.
 
   match goal with
-  | [H: consistent_state _ _ |- _] =>
+  | [H: consistent_state _ _ _ |- _] =>
     inversion H; subst; try discriminate
   end.
+  
   match goal with
-  | [H: consistent_state _ (?c, _) |- _] =>
+  | [H: consistent_state _ _ (?c, _) |- _] =>
     set (conn := c)
   end.
 
@@ -47,7 +53,7 @@ Proof.
   do 5 forward.
 
   match goal with
-  | [|- context[TRACE _]] =>
+  | [|- context[ITREE _]] =>
   match goal with
   | [|- context[SOCKAPI _]] =>
   match goal with
@@ -170,7 +176,7 @@ Proof.
     end.
 
     subst send_res.
-    take_branch2 8.
+    take_branch2 2.
     trace_bind_ret.
 
     forward.
@@ -283,12 +289,12 @@ Proof.
 
   rewrite complete_cond.
   trace_bind_ret.
-  
-  gather_SEP 1 2 3 4.
+
+  gather_SEP 3 4 5 6 0.
   Intros.
-  gather_SEP 0 1 2 3 4 5 6.
+  gather_SEP 0 1 2 3 4 7 8.
   repeat rewrite <- sepcon_assoc.
-  rewrite <- connection_list_cell_eq; [| assumption].
+  rewrite <- connection_list_cell_eq by assumption.
   
   set (conn_pre_reset :=
          {| conn_id := client_id;
@@ -330,4 +336,4 @@ Proof.
     simpl.
     cancel.
     
-Qed. 
+Qed.

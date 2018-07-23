@@ -15,18 +15,18 @@ Require Import DeepWeb.Free.Monad.Free.
 Require Import DeepWeb.Free.Monad.Common.
 Require Import DeepWeb.Free.Monad.Verif.
 
+Require Import DeepWeb.Lib.Util.
 Require Import DeepWeb.Lib.SocketConstants.
-
 Require Export DeepWeb.Lib.NetworkInterface.
 
-Module SocketAPI. (* <: EventType. *)
+Module SocketAPI.
 
   Open Scope Z.
   
   Parameter is_fd: Z -> Prop.
-  Parameter fd_nonneg: forall i : Z, is_fd i -> i < 0 -> False.
-  Parameter fd_bound: forall i, is_fd i -> 0 <= i <= MAX_FD.
-  Parameter zero_is_fd : is_fd 0.
+  Axiom fd_nonneg: forall i : Z, is_fd i -> i < 0 -> False.
+  Axiom fd_bound: forall i, is_fd i -> 0 <= i <= MAX_FD.
+  Axiom zero_is_fd : is_fd 0.
 
   Record sockfd: Type :=
     { descriptor: Z; is_descriptor: is_fd descriptor }.
@@ -47,21 +47,21 @@ Module SocketAPI. (* <: EventType. *)
     reflexivity.
   Qed.
       
-  Definition SocketM : Type -> Type := (nondetE +' failureE +' networkE).
+  Definition SocketE : Type -> Type := (nondetE +' failureE +' networkE).
 
-  Instance SocketM_networkE : networkE -< SocketM.
+  Instance SocketE_networkE : networkE -< SocketE.
   constructor.
   intros.
-  unfold SocketM.
+  unfold SocketE.
   apply inr.
   trivial.
   Defined.
 
-  Instance SocketM_nondetE: nondetE -< SocketM.
+  Instance SocketE_nondetE: nondetE -< SocketE.
   repeat constructor; trivial.
   Defined.
 
-  Instance SocketMonad_failureE: failureE -< SocketM.
+  Instance SocketE_failureE: failureE -< SocketE.
   constructor.
   intros.
   apply inl.
@@ -108,7 +108,7 @@ Module SocketAPI. (* <: EventType. *)
   Module TraceIncl.
   Section TraceIncl.
 
-  Definition M_ := M SocketM.
+  Definition M_ := M SocketE.
 
   Definition trace := list (sigT (fun Y => networkE Y * Y)%type).
 
